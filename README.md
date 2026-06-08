@@ -28,13 +28,13 @@ MONGO_URL=mongodb://localhost:27017/ecommerce
 
 JWT_SECRET=miClaveSecretaSuperSegura123
 JWT_COOKIE_NAME=jwtCookieToken
-JWT_RESET_SECRET=otraClaveSecretaParaResetDePassword456
+
 
 PERSISTENCE=mongo
 
 MAIL_SERVICE=gmail
-MAIL_USER=tucorreo@gmail.com
-MAIL_PASS=tu_app_password_de_16_caracteres
+MAIL_USER=---
+MAIL_PASS=---
 
 BASE_URL=http://localhost:8080
 ```
