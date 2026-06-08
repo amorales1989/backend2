@@ -2,14 +2,14 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import passport from 'passport';
-import 'dotenv/config';
 
+import config from './config/config.js';
 import initializePassport from './config/passport.config.js';
 import sessionsRouter from './routes/sessions.router.js';
+import productsRouter from './routes/products.router.js';
+import cartsRouter from './routes/carts.router.js';
 
 const app = express();
-const PORT = process.env.PORT || 8080;
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost:27017/ecommerce';
 
 // Middlewares
 app.use(express.json());
@@ -22,26 +22,27 @@ app.use(passport.initialize());
 
 // Rutas
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/products', productsRouter);
+app.use('/api/carts', cartsRouter);
 
 app.get('/', (req, res) => {
     res.json({
         status: 'ok',
-        message: 'API Ecommerce con autenticación JWT',
+        message: 'API Ecommerce con autenticación JWT, roles y compras',
         endpoints: {
-            register: 'POST /api/sessions/register',
-            login: 'POST /api/sessions/login',
-            current: 'GET /api/sessions/current',
-            logout: 'POST /api/sessions/logout'
+            sessions: '/api/sessions',
+            products: '/api/products',
+            carts: '/api/carts'
         }
     });
 });
 
 // Conexión a MongoDB y arranque del server
-mongoose.connect(MONGO_URL)
+mongoose.connect(config.mongoUrl)
     .then(() => {
         console.log('Conectado a MongoDB');
-        app.listen(PORT, () => {
-            console.log(`Servidor escuchando en http://localhost:${PORT}`);
+        app.listen(config.port, () => {
+            console.log(`Servidor escuchando en http://localhost:${config.port}`);
         });
     })
     .catch((err) => {

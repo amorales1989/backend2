@@ -1,0 +1,138 @@
+### Archivo de pruebas (extensión "REST Client" de VSCode).
+### Antes de correr esto: `npm run seed` para tener admin, user y productos.
+### Las cookies JWT se guardan solas entre requests dentro de cada sesión.
+
+@host = http://localhost:8080
+
+############################################################
+# 1. AUTENTICACIÓN
+############################################################
+
+### Registrar un usuario nuevo (rol user por defecto)
+POST {{host}}/api/sessions/register
+Content-Type: application/json
+
+{
+  "first_name": "Nuevo",
+  "last_name": "Usuario",
+  "email": "nuevo@mail.com",
+  "age": 28,
+  "password": "1234"
+}
+
+### Login como ADMIN (del seed)
+# @name loginAdmin
+POST {{host}}/api/sessions/login
+Content-Type: application/json
+
+{
+  "email": "admin@mail.com",
+  "password": "admin1234"
+}
+
+### Login como USER (del seed)
+# @name loginUser
+POST {{host}}/api/sessions/login
+Content-Type: application/json
+
+{
+  "email": "user@mail.com",
+  "password": "user1234"
+}
+
+### Current → devuelve el DTO (sin password)
+GET {{host}}/api/sessions/current
+
+### Logout
+POST {{host}}/api/sessions/logout
+
+############################################################
+# 2. RECUPERACIÓN DE CONTRASEÑA
+############################################################
+
+### Solicitar recuperación (manda el correo con el link)
+POST {{host}}/api/sessions/forgot-password
+Content-Type: application/json
+
+{
+  "email": "user@mail.com"
+}
+
+### Reset directo (reemplazá TOKEN por el del link del correo)
+POST {{host}}/api/sessions/reset-password
+Content-Type: application/json
+
+{
+  "token": "PEGAR_TOKEN_DEL_CORREO",
+  "password": "nuevaPassword123"
+}
+
+############################################################
+# 3. PRODUCTOS
+############################################################
+
+### Listar productos (público)
+GET {{host}}/api/products
+
+### Crear producto — requiere estar logueado como ADMIN
+# (corré primero "Login como ADMIN")
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  "title": "Parlante Bluetooth",
+  "description": "Portátil, resistente al agua",
+  "code": "PAR-001",
+  "price": 40000,
+  "stock": 12,
+  "category": "Audio"
+}
+
+### Intentar crear producto como USER → debe devolver 403
+# (corré primero "Login como USER")
+POST {{host}}/api/products
+Content-Type: application/json
+
+{
+  "title": "No permitido",
+  "description": "Esto no debería crearse",
+  "code": "FAIL-001",
+  "price": 1,
+  "stock": 1,
+  "category": "Test"
+}
+
+### Actualizar producto (ADMIN) — reemplazá :pid
+PUT {{host}}/api/products/PRODUCT_ID
+Content-Type: application/json
+
+{
+  "stock": 50
+}
+
+### Eliminar producto (ADMIN) — reemplazá :pid
+DELETE {{host}}/api/products/PRODUCT_ID
+
+############################################################
+# 4. CARRITO Y COMPRA  (logueado como USER)
+############################################################
+
+### Agregar producto al carrito propio — reemplazá :pid por un id real
+POST {{host}}/api/carts/products/PRODUCT_ID
+Content-Type: application/json
+
+{
+  "quantity": 2
+}
+
+### Ver el carrito — reemplazá :cid por el cart del user
+GET {{host}}/api/carts/CART_ID
+
+### Quitar un producto del carrito
+DELETE {{host}}/api/carts/products/PRODUCT_ID
+
+### Vaciar el carrito
+DELETE {{host}}/api/carts
+
+### Finalizar compra → genera ticket, verifica stock
+POST {{host}}/api/carts/purchase
